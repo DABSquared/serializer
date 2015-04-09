@@ -191,6 +191,50 @@ abstract class GenericSerializationVisitor extends AbstractVisitor
 
         $this->data[$key] = $value;
     }
+    
+    /**
+     * Allows you to remove data from the current object based on name.
+     *
+     * @param string $key
+     * @throws Exception\InvalidArgumentException
+     */
+    public function removeDataPropertyName($propertyName)
+    {
+    	$propMetadata = new PropertyMetadata();
+    	$propMetadata->name = $propertyName;
+    	$k = $this->namingStrategy->translateName($propMetadata);
+    
+        if (!isset($this->data[$key])) {
+            throw new InvalidArgumentException(sprintf('There is no data for "%s".', $key));
+        }
+
+        unset($this->data[$key]);
+    }
+    
+    /**
+     * Allows you to remove data from the current object/root element.
+     *
+     * @param string $key
+     * @throws Exception\InvalidArgumentException
+     */
+    public function removeData($key)
+    {
+        if (!isset($this->data[$key])) {
+            throw new InvalidArgumentException(sprintf('There is no data for "%s".', $key));
+        }
+
+        unset($this->data[$key]);
+    }
+
+    /**
+     * Returns the current object
+     *
+     * @return mixed
+     */
+    public function getData()
+    {
+        return $this->data;
+    }
 
     public function getRoot()
     {
