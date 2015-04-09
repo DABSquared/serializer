@@ -200,14 +200,18 @@ abstract class GenericSerializationVisitor extends AbstractVisitor
      */
     public function removeDataPropertyName($propertyName)
     {
-    	$propMetadata = new PropertyMetadata();
-    	$propMetadata->name = $propertyName;
-    	$k = $this->namingStrategy->translateName($propMetadata);
+        $std = new \stdClass();
+        $std->temp = 'temp';
+
+    	$propMetadata = new PropertyMetadata($std, "temp");
+        $propMetadata->name = $propertyName;
+        $key = $this->namingStrategy->translateName($propMetadata);
     
-        if (!isset($this->data[$key])) {
+        if (!array_key_exists($key, $this->data)) {
             throw new InvalidArgumentException(sprintf('There is no data for "%s".', $key));
         }
-
+        unset($propMetadata);
+        unset($std);
         unset($this->data[$key]);
     }
     
