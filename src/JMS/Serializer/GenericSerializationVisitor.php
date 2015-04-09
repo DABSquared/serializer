@@ -223,7 +223,7 @@ abstract class GenericSerializationVisitor extends AbstractVisitor
      */
     public function removeData($key)
     {
-        if (!isset($this->data[$key])) {
+        if (!array_key_exists($key, $this->data)) {
             throw new InvalidArgumentException(sprintf('There is no data for "%s".', $key));
         }
 
