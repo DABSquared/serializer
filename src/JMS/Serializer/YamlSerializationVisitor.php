@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2013 Johannes M. Schmitt <schmittjoh@gmail.com>
+ * Copyright 2016 Johannes M. Schmitt <schmittjoh@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ class YamlSerializationVisitor extends AbstractVisitor
             || array_keys($data) === range(0, count($data) - 1);
 
         foreach ($data as $k => $v) {
-            if (null === $v && ( ! is_string($k) || ! $context->shouldSerializeNull())) {
+            if (null === $v && $context->shouldSerializeNull() !== true) {
                 continue;
             }
 
@@ -178,7 +178,7 @@ class YamlSerializationVisitor extends AbstractVisitor
     {
         $v = $metadata->getValue($data);
 
-        if (null === $v && ! $context->shouldSerializeNull()) {
+        if (null === $v && $context->shouldSerializeNull() !== true) {
             return;
         }
 

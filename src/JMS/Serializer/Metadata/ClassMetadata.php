@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2013 Johannes M. Schmitt <schmittjoh@gmail.com>
+ * Copyright 2016 Johannes M. Schmitt <schmittjoh@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,8 +56,9 @@ class ClassMetadata extends MergeableClassMetadata
     public $discriminatorFieldName;
     public $discriminatorValue;
     public $discriminatorMap = array();
+    public $discriminatorGroups = array();
 
-    public function setDiscriminator($fieldName, array $map)
+    public function setDiscriminator($fieldName, array $map, array $groups = array())
     {
         if (empty($fieldName)) {
             throw new \InvalidArgumentException('The $fieldName cannot be empty.');
@@ -70,6 +71,7 @@ class ClassMetadata extends MergeableClassMetadata
         $this->discriminatorBaseClass = $this->name;
         $this->discriminatorFieldName = $fieldName;
         $this->discriminatorMap = $map;
+        $this->discriminatorGroups = $groups;
     }
 
     /**
@@ -158,6 +160,19 @@ class ClassMetadata extends MergeableClassMetadata
                 $this->discriminatorBaseClass,
                 $this->discriminatorBaseClass
             ));
+        } elseif ( ! $this->discriminatorFieldName && $object->discriminatorFieldName) {
+            $this->discriminatorFieldName = $object->discriminatorFieldName;
+            $this->discriminatorMap = $object->discriminatorMap;
+        }
+
+        if ($object->discriminatorDisabled !== null) {
+            $this->discriminatorDisabled = $object->discriminatorDisabled;
+        }
+
+        if ($object->discriminatorMap) {
+            $this->discriminatorFieldName = $object->discriminatorFieldName;
+            $this->discriminatorMap = $object->discriminatorMap;
+            $this->discriminatorBaseClass = $object->discriminatorBaseClass;
         }
 
         if ($this->discriminatorMap && ! $this->reflection->isAbstract()) {
@@ -184,7 +199,8 @@ class ClassMetadata extends MergeableClassMetadata
             $discriminatorProperty = new StaticPropertyMetadata(
                 $this->name,
                 $this->discriminatorFieldName,
-                $typeValue
+                $typeValue,
+                $this->discriminatorGroups
             );
             $discriminatorProperty->serializedName = $this->discriminatorFieldName;
             $this->propertyMetadata[$this->discriminatorFieldName] = $discriminatorProperty;
@@ -230,12 +246,16 @@ class ClassMetadata extends MergeableClassMetadata
             $this->discriminatorFieldName,
             $this->discriminatorValue,
             $this->discriminatorMap,
+            $this->discriminatorGroups,
             parent::serialize(),
+            'discriminatorGroups' => $this->discriminatorGroups,
         ));
     }
 
     public function unserialize($str)
     {
+        $deserializedData = unserialize($str);
+
         list(
             $this->preSerializeMethods,
             $this->postSerializeMethods,
@@ -251,8 +271,13 @@ class ClassMetadata extends MergeableClassMetadata
             $this->discriminatorFieldName,
             $this->discriminatorValue,
             $this->discriminatorMap,
+            $this->discriminatorGroups,
             $parentStr
-        ) = unserialize($str);
+        ) = $deserializedData;
+
+        if (isset($deserializedData['discriminatorGroups'])) {
+            $this->discriminatorGroups = $deserializedData['discriminatorGroups'];
+        }
 
         parent::unserialize($parentStr);
     }
